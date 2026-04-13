@@ -29,13 +29,6 @@ app.use((req, res, next) => {
 // Main routes
 app.use("/", routes);
 
-// Handle non-existent routes (404)
-app.use((req, res) => {
-  res.status(404).send({
-    message: "Requested resource not found",
-  });
-});
-
 // Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
