@@ -18,14 +18,6 @@ mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db")
     console.error("Error connecting to MongoDB:", error);
   });
 
-// Temporary authorization middleware
-app.use((req, res, next) => {
-  req.user = {
-    _id: "69dabc9bf4fd8b59d02ab067",
-  };
-  next();
-});
-
 // Main routes
 app.use("/", routes);
 

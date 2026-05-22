@@ -2,6 +2,7 @@ const ClothingItem = require("../models/clothingItem");
 
 const {
   BAD_REQUEST,
+  FORBIDDEN,
   NOT_FOUND,
   SERVER_ERROR,
 } = require("../utils/errors");
@@ -38,17 +39,31 @@ const getItems = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail()
-    .then((item) => res.send(item))
+    .then((item) => {
+      if (item.owner.toString() !== req.user._id) {
+        return res.status(FORBIDDEN).send({
+          message: "You do not have permission to delete this item",
+        });
+      }
+
+      return ClothingItem.findByIdAndDelete(itemId).then((deletedItem) =>
+        res.send(deletedItem)
+      );
+    })
     .catch((err) => {
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid item id" });
       }
+
       if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
-      return res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+
+      return res.status(SERVER_ERROR).send({
+        message: "An error has occurred on the server.",
+      });
     });
 };
 
@@ -57,9 +72,7 @@ const likeItem = (req, res) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
-    itemId,
-    { $addToSet: { likes: req.user._id } },
-    { new: true }
+    itemId, { $addToSet: { likes: req.user._id } }, { new: true }
   )
     .orFail()
     .then((item) => res.send(item))
@@ -79,9 +92,7 @@ const dislikeItem = (req, res) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
-    itemId,
-    { $pull: { likes: req.user._id } },
-    { new: true }
+    itemId, { $pull: { likes: req.user._id } }, { new: true }
   )
     .orFail()
     .then((item) => res.send(item))
