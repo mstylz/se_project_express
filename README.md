@@ -14,6 +14,8 @@ The server is built using Node.js and Express, with MongoDB as the database. It 
 * Express.js
 * MongoDB
 * Mongoose
+* bcryptjs
+* jsonwebtoken (JWT)
 * ESLint (Airbnb config)
 * Prettier
 * Nodemon
@@ -22,14 +24,17 @@ The server is built using Node.js and Express, with MongoDB as the database. It 
 
 ## Functionality
 
-* Create and manage users
-* Retrieve user data
-* Create clothing items
-* Delete clothing items
-* Like and unlike items
-* Input validation for data fields
+* User signup and signin
+* JWT-based authentication
+* Protected API routes
+* Retrieve and update current user data
+* Create and manage clothing items
+* Delete clothing items with ownership authorization
+* Like and unlike clothing items
+* Password hashing with bcryptjs
+* Input validation for user and item data
 * Error handling for invalid requests
-* REST API structure
+* RESTful API structure
 
 ---
 
@@ -70,6 +75,28 @@ Example:
 
 ## Future Improvements
 
-* Add authentication with JWT
-* Add password hashing
-* Deploy to a remote server
+## Future Improvements
+
+* Add centralized error handling middleware
+* Deploy the API to a remote server
+* Add HTTPS support
+* Add automated testing
+* Add refresh tokens and token expiration handling
+
+## Notes
+
+One of the GitHub Actions checks still references the Project 12 temporary authorization middleware in `app.js`.
+
+For Project 13, the hardcoded `req.user` middleware was intentionally removed and replaced with JWT-based authentication and authorization, as required by the project specifications.
+
+All Project 13 endpoints were manually tested successfully, including:
+- signup/signin
+- JWT authentication
+- protected routes
+- likes/dislikes
+- ownership authorization
+- protected deletion
+
+  ## Project Pitch Video
+
+Check out [this video](ADD_LINK_HERE), where I describe my project and the challenges I faced while building it.
