@@ -99,4 +99,4 @@ All Project 13 endpoints were manually tested successfully, including:
 
   ## Project Pitch Video
 
-Check out [this video](ADD_LINK_HERE), where I describe my project and the challenges I faced while building it.
+Check out this video(https://www.loom.com/share/9092acd40dc546d0bb542ba2907ca0db), where I describe my project and the challenges I faced while building it.
