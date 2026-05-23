@@ -13,8 +13,7 @@ const {
   UNAUTHORIZED,
 } = require("../utils/errors");
 
-
-// POST /users
+// POST /signup
 const createUser = (req, res) => {
   const {
     name,
@@ -23,21 +22,25 @@ const createUser = (req, res) => {
     password,
   } = req.body;
 
-  bcrypt.hash(password, 10)
+  if (!email || !password) {
+    return res.status(BAD_REQUEST).send({
+      message: "The email and password fields are required",
+    });
+  }
+
+  return bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name,
       avatar,
       email,
       password: hash,
     }))
-    .then((user) => {
-      res.status(201).send({
-        _id: user._id,
-        name: user.name,
-        avatar: user.avatar,
-        email: user.email,
-      });
-    })
+    .then((user) => res.status(201).send({
+      _id: user._id,
+      name: user.name,
+      avatar: user.avatar,
+      email: user.email,
+    }))
     .catch((err) => {
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({
@@ -57,25 +60,42 @@ const createUser = (req, res) => {
     });
 };
 
+// POST /signin
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: "7d",
-      });
+  if (!email || !password) {
+    return res.status(BAD_REQUEST).send({
+      message: "The email and password fields are required",
+    });
+  }
 
-      res.send({ token });
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign(
+        { _id: user._id },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      return res.send({ token });
     })
-    .catch(() =>
-      res.status(UNAUTHORIZED).send({
-        message: "Incorrect email or password",
-      })
-    );
+    .catch((err) => {
+      if (err.message === "Incorrect email or password") {
+        return res.status(UNAUTHORIZED).send({
+          message: "Incorrect email or password",
+        });
+      }
+
+      return res.status(SERVER_ERROR).send({
+        message: "An error has occurred on the server.",
+      });
+    });
 };
+
+// GET /users/me
 const getCurrentUser = (req, res) => {
-  User.findById(req.user._id)
+  return User.findById(req.user._id)
     .orFail()
     .then((user) => res.send(user))
     .catch((err) => {
@@ -90,14 +110,18 @@ const getCurrentUser = (req, res) => {
       });
     });
 };
+
+// PATCH /users/me
 const updateCurrentUser = (req, res) => {
   const { name, avatar } = req.body;
 
-  User.findByIdAndUpdate(
-    req.user._id, { name, avatar }, {
-    new: true,
-    runValidators: true,
-  }
+  return User.findByIdAndUpdate(
+    req.user._id,
+    { name, avatar },
+    {
+      new: true,
+      runValidators: true,
+    }
   )
     .orFail()
     .then((user) => res.send(user))
