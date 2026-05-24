@@ -35,12 +35,14 @@ const createUser = (req, res) => {
       email,
       password: hash,
     }))
-    .then((user) => res.status(201).send({
-      _id: user._id,
-      name: user.name,
-      avatar: user.avatar,
-      email: user.email,
-    }))
+    .then((user) => {
+      res.status(201).send({
+        _id: user._id,
+        name: user.name,
+        avatar: user.avatar,
+        email: user.email,
+      });
+    })
     .catch((err) => {
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({
@@ -72,13 +74,11 @@ const login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        JWT_SECRET,
-        { expiresIn: "7d" }
+      const token = jwt.sign({ _id: user._id },
+        JWT_SECRET, { expiresIn: "7d" }
       );
 
-      return res.send({ token });
+      res.send({ token });
     })
     .catch((err) => {
       if (err.message === "Incorrect email or password") {
@@ -94,34 +94,30 @@ const login = (req, res) => {
 };
 
 // GET /users/me
-const getCurrentUser = (req, res) => {
-  return User.findById(req.user._id)
-    .orFail()
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({
-          message: "User not found",
-        });
-      }
-
-      return res.status(SERVER_ERROR).send({
-        message: "An error has occurred on the server.",
+const getCurrentUser = (req, res) => User.findById(req.user._id)
+  .orFail()
+  .then((user) => res.send(user))
+  .catch((err) => {
+    if (err.name === "DocumentNotFoundError") {
+      return res.status(NOT_FOUND).send({
+        message: "User not found",
       });
+    }
+
+    return res.status(SERVER_ERROR).send({
+      message: "An error has occurred on the server.",
     });
-};
+  });
 
 // PATCH /users/me
 const updateCurrentUser = (req, res) => {
   const { name, avatar } = req.body;
 
   return User.findByIdAndUpdate(
-    req.user._id,
-    { name, avatar },
-    {
-      new: true,
-      runValidators: true,
-    }
+    req.user._id, { name, avatar }, {
+    new: true,
+    runValidators: true,
+  }
   )
     .orFail()
     .then((user) => res.send(user))
