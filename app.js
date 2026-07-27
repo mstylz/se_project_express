@@ -17,17 +17,24 @@ app.use(express.json());
 
 // Connect to MongoDB
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db")
-    .then(() => {
-        console.log("Connected to MongoDB");
-    })
-    .catch((error) => {
-        console.error("Error connecting to MongoDB:", error);
-    });
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });
+
+// Crash test route (required for Project 15 review)
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
 
 // Main routes
-app.use("/", routes);
+app.use(routes);
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
