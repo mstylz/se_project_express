@@ -1,22 +1,25 @@
-require('dotenv').config();
+require("dotenv").config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
 const routes = require("./routes");
-
+const {
+  requestLogger,
+  errorLogger,
+} = require("./middlewares/logger");
+const errorHandler = require("./middlewares/error-handler");
 
 const app = express();
 const { PORT = 3001 } = process.env;
 
-// Enable CORS
 app.use(cors());
-
-// Parse incoming JSON requests
 app.use(express.json());
+app.use(requestLogger);
 
-// Connect to MongoDB
-mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db")
+mongoose
+  .connect("mongodb://localhost:27017/wtwr_db")
   .then(() => {
     console.log("Connected to MongoDB");
   })
@@ -24,17 +27,18 @@ mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db")
     console.error("Error connecting to MongoDB:", error);
   });
 
-// Crash test route (required for Project 15 review)
+// Required temporarily for the Project 15 review.
 app.get("/crash-test", () => {
   setTimeout(() => {
     throw new Error("Server will crash now");
   }, 0);
 });
 
-// Main routes
 app.use(routes);
 
-// Start server
+app.use(errorLogger);
+app.use(errorHandler);
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

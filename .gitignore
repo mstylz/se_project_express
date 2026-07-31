@@ -14,3 +14,8 @@ node_modules
 .idea
 .vscode
 .env
+
+# Winston logs
+request.log
+error.log
+*.log

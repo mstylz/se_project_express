@@ -7,16 +7,14 @@ const {
   dislikeItem,
 } = require("../controllers/clothingItem");
 
-// Create
-router.post("/", createItem);
+const {
+  validateCreateItem,
+  validateItemId,
+} = require("../middlewares/validation");
 
-// Delete
-router.delete("/:itemId", deleteItem);
-
-// Like
-router.put("/:itemId/likes", likeItem);
-
-// Unlike
-router.delete("/:itemId/likes", dislikeItem);
+router.post("/", validateCreateItem, createItem);
+router.delete("/:itemId", validateItemId, deleteItem);
+router.put("/:itemId/likes", validateItemId, likeItem);
+router.delete("/:itemId/likes", validateItemId, dislikeItem);
 
 module.exports = router;
